@@ -3,18 +3,17 @@
 #include <fstream>
 #include <iostream>
 #include <sstream>
-#include <array>
 
 Model::Model(const std::string &filename) {
     std::ifstream obj{filename};
     std::string line;
 
     while (std::getline(obj, line)) {
+        std::string part;
+        std::vector<double> values;
+
         if (line.starts_with("v ")) {
             std::stringstream stream(line.substr(2));
-            std::string part;
-
-            std::vector<double> values;
             while (std::getline(stream, part, ' ')) {
                 auto value = std::stod(part);
                 values.push_back(value);
@@ -23,9 +22,6 @@ Model::Model(const std::string &filename) {
             _vertices.push_back(Vec2(values[0], values[1]));
         } else if (line.starts_with("f ")) {
             std::stringstream stream(line.substr(2));
-            std::string part;
-
-            std::vector<int> values;
             while (std::getline(stream, part, ' ')) {
                 auto slash_index = part.find('/');
                 part = part.substr(0, slash_index);
@@ -33,7 +29,7 @@ Model::Model(const std::string &filename) {
                 values.push_back(value);
             }
 
-            _faces.push_back(std::array<int, 3>{values[0], values[1], values[2]});
+            _faces.push_back(Vec3(values[0], values[1], values[2]));
         }
     }
 }
@@ -50,6 +46,6 @@ Vec2 Model::vertex_at(int index) const {
     return _vertices[index];
 }
 
-std::array<int, 3> Model::face_at(int index) const {
+Vec3 Model::face_at(int index) const {
     return _faces[index];
 }

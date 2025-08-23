@@ -9,7 +9,7 @@
 class Model {
 private:
     std::vector<Vec2> _vertices;
-    std::vector<std::array<int, 3>> _faces;
+    std::vector<Vec3> _faces;
 
 public:
     explicit Model(const std::string &filename);
@@ -20,5 +20,5 @@ public:
 
     Vec2 vertex_at(int index) const;
 
-    std::array<int, 3> face_at(int index) const;
+    Vec3 face_at(int index) const;
 };

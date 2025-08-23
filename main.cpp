@@ -9,6 +9,10 @@ constexpr TGAColor red = {0, 0, 255, 255};
 constexpr TGAColor blue = {255, 128, 64, 255};
 constexpr TGAColor yellow = {0, 200, 255, 255};
 
+void pixel(double x, double y, TGAImage &image, const TGAColor &color) {
+    image.set(static_cast<int>(std::round(x)), static_cast<int>(std::round(y)), color);
+}
+
 void line(Vec2 start, Vec2 end, TGAImage &image, const TGAColor &color) {
     auto is_steep = false;
 
@@ -27,11 +31,17 @@ void line(Vec2 start, Vec2 end, TGAImage &image, const TGAColor &color) {
         const auto y = start.y + t * (end.y - start.y);
 
         if (is_steep) {
-            image.set(std::round(y), std::round(x), color);
+            pixel(y, x, image, color);
         } else {
-            image.set(std::round(x), std::round(y), color);
+            pixel(x, y, image, color);
         }
     }
+}
+
+Vec2 scale(Vec2 orig, int width, int height) {
+    orig.x = (orig.x + 1) * width / 2.;
+    orig.y = (orig.y + 1) * height / 2.;
+    return orig;
 }
 
 int main(int argc, char **argv) {
@@ -48,10 +58,8 @@ int main(int argc, char **argv) {
             auto start = model.vertex_at(face.at(j) - 1);
             auto end = model.vertex_at(face.at((j + 1) % 3) - 1);
 
-            start.x = (start.x + 1) * width / 2.;
-            start.y = (start.y + 1) * height / 2.;
-            end.x = (end.x + 1) * width / 2.;
-            end.y = (end.y + 1) * height / 2.;
+            start = scale(start, width, height);
+            end = scale(end, width, height);
 
             line(start, end, framebuffer, red);
         }
@@ -59,11 +67,9 @@ int main(int argc, char **argv) {
 
     for (int i = 0; i < model.len_vertices(); i++) {
         auto vert = model.vertex_at(i);
+        vert = scale(vert, width, height);
 
-        vert.x = (vert.x + 1) * width / 2.;
-        vert.y = (vert.y + 1) * height / 2.;
-
-        framebuffer.set(vert.x, vert.y, white);
+        pixel(vert.x, vert.y, framebuffer, white);
     }
 
     return framebuffer.write_tga_file("framebuffer.tga");
