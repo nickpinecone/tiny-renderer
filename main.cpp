@@ -1,6 +1,7 @@
 #include <cmath>
 #include "tgaimage.h"
 #include "geometry.h"
+#include "model.h"
 
 constexpr TGAColor white = {255, 255, 255, 255}; // attention, BGRA order
 constexpr TGAColor green = {0, 255, 0, 255};
@@ -26,29 +27,44 @@ void line(Vec2 start, Vec2 end, TGAImage &image, const TGAColor &color) {
         const auto y = start.y + t * (end.y - start.y);
 
         if (is_steep) {
-            image.set(static_cast<int>(y), static_cast<int>(x), color);
+            image.set(std::round(y), std::round(x), color);
         } else {
-            image.set(static_cast<int>(x), static_cast<int>(y), color);
+            image.set(std::round(x), std::round(y), color);
         }
     }
 }
 
 int main(int argc, char **argv) {
-    constexpr int width = 64;
-    constexpr int height = 64;
+    constexpr int width = 1000;
+    constexpr int height = 1000;
     TGAImage framebuffer(width, height, TGAImage::RGB);
 
-    const Vec2 A(7, 3);
-    const Vec2 B(12, 37);
-    const Vec2 C(62, 53);
+    Model model{"./obj/diablo3_pose/diablo3_pose.obj"};
 
-    framebuffer.set(static_cast<int>(A.x), static_cast<int>(A.y), white);
-    framebuffer.set(static_cast<int>(B.x), static_cast<int>(B.y), white);
-    framebuffer.set(static_cast<int>(C.x), static_cast<int>(C.y), white);
+    for (int i = 0; i < model.len_faces(); i++) {
+        auto face = model.face_at(i);
 
-    line(A, B, framebuffer, white);
-    line(B, C, framebuffer, white);
-    line(C, A, framebuffer, white);
+        for (int j = 0; j < 3; j++) {
+            auto start = model.vertex_at(face.at(j) - 1);
+            auto end = model.vertex_at(face.at((j + 1) % 3) - 1);
+
+            start.x = (start.x + 1) * width / 2.;
+            start.y = (start.y + 1) * height / 2.;
+            end.x = (end.x + 1) * width / 2.;
+            end.y = (end.y + 1) * height / 2.;
+
+            line(start, end, framebuffer, red);
+        }
+    }
+
+    for (int i = 0; i < model.len_vertices(); i++) {
+        auto vert = model.vertex_at(i);
+
+        vert.x = (vert.x + 1) * width / 2.;
+        vert.y = (vert.y + 1) * height / 2.;
+
+        framebuffer.set(vert.x, vert.y, white);
+    }
 
     return framebuffer.write_tga_file("framebuffer.tga");
 }
