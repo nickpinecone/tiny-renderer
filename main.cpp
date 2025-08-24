@@ -49,7 +49,7 @@ int main(int argc, char **argv) {
     constexpr int height = 1000;
     TGAImage framebuffer(width, height, TGAImage::RGB);
 
-    Model model{"./obj/diablo3_pose/diablo3_pose.obj"};
+    Model model{"./obj/african_head/african_head.obj"};
 
     for (int i = 0; i < model.len_faces(); i++) {
         auto face = model.face_at(i);
